@@ -3,7 +3,7 @@
 # install.packages("data.table")
 # library(data.table)
 
-setwd("/Users/johannahcramer/Desktop/Guidelines project/Analysis")
+setwd("/Users/johannahcramer/Documents/GitHub/coi")
 
 fname <- "/Users/johannahcramer/Desktop/Guidelines project/NPI registry downloads/Registry data/NPPES_Data_Dissemination_April_2023/npidata_pfile_20050523-20230409.csv"
 header <- fread(fname, nrows=0)
