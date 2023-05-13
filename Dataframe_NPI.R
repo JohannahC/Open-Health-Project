@@ -6,7 +6,7 @@
 setwd("/Users/johannahcramer/Documents/GitHub/coi")
 
 fname <- "/Users/johannahcramer/Desktop/Guidelines project/NPI registry downloads/Registry data/NPPES_Data_Dissemination_April_2023/npidata_pfile_20050523-20230409.csv"
-header <- fread(fname, nrows=0)
+header <- fread(fname, nrows=0 )
 npi_all_subset <- fread(fname, skip = 1000000, nrows = 10000, col.names = names(header))
 View(npi_all_subset)
 
