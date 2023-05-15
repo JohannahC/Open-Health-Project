@@ -1,6 +1,8 @@
 library(tidyverse)
 
-download.file("https://download.cms.gov/nppes/NPPES_Data_Dissemination_May_2023.zip", "data-raw/npi.zip")
+download.file("https://download.cms.gov/nppes/NPPES_Data_Dissemination_May_2023.zip",
+              "data-raw/npi.zip",
+              timeout = 5 * 60)
 
 npi <- read_csv(
   unz("data-raw/npi.zip",
