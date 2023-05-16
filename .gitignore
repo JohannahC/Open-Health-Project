@@ -5,3 +5,5 @@
 data-raw/*
 !data-raw/*.R
 docs
+.DS_Store
+.Rhistory
