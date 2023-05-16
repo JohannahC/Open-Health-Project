@@ -31,7 +31,7 @@ npi |>
 # Unsure:
 #   - cols 39-41: NPI deactivation/reactivation info - need to think on this and test if deactivated NPIs are in OP
 #   - cols 312-314(?),330
-#   - col 308: do we want to know if our NPI holder also owns a practice?
+#   - col 308: do we want to know if our NPI holder also owns a practice ?
 #   - col 330: unclear what this is
 
 # Notes/thoughts:
