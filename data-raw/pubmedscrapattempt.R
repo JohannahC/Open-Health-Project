@@ -6,46 +6,83 @@
 library(easyPubMed)
 library(httr)
 library(xml2)
+library(jsonlite)
+library(tidyverse)
 
-#easyPubMed has 2 elements: 1) the query and 2) the fetch
 
-#query
-my_query <- '("2013/01/01"[Date - Publication] : "2023/12/31"[Date - Publication]) AND ("diabetes"[Title/Abstract]) AND (("Practice Guideline"[Publication Type]) OR "guideline"[Title/Abstract] OR "consensus"[Title/Abstract]) AND ("American Diabetes Association")'
-my_ids <- get_pubmed_ids(my_query)
 
-#fetch
-my_abstracts_xml <- fetch_pubmed_data(my_ids)
-class(my_abstracts_xml)
+medical_associations <- c(
+  "American Heart Association",
+  "American College of Cardiology",
+  "Society for Vascular Surgery",
+  "European Association for the Study of Diabetes",
+  "American Medical Society for Sports Medicine",
+  "American Association of Clinical Endocrinologists",
+  "US Preventative Services Task Force",
+  "Heart Failure Society of America",
+  "American College of Radiology",
+  "American College of Physicians",
+  "US Department of Veterans Affairs",
+  "US Department of Defense",
+  "American Podiatric Medical Association",
+  "Society for Vascular Medicine",
+  "American Association of Diabetes Educators",
+  "Academy of Nutrition and Dietetics",
+  "North American Menopause Society",
+  "Endocrine Society",
+  "American Society for Nutrition",
+  "Cystic Fibrosis Foundation"
+)
 
-#learn something about xml tags
-xml_doc <- read_xml(my_abstracts_xml)
-xml_elements <- xml_find_all(xml_doc, ".//*")
+# Loop over the medical associations
+for (i in seq_along(medical_associations)) {
+  # store the association name in a variable so we can access it more conveniently
+  association <- medical_associations[i]
 
-# Extract the unique XML tags from the elements
-tags <- unique(xml_name(xml_elements))
+  # build query string
+  cat("Running over", i, association, '\n')
+  query <-
+    sprintf(
+      '("2013/01/01"[Date - Publication] : "2023/12/31"[Date - Publication]) AND ("diabetes"[Title/Abstract]) AND (("Practice Guideline"[Publication Type]) OR "guideline"[Title/Abstract] OR "consensus"[Title/Abstract]) AND ("%s")',
+      association
+    )
+  cat("Full query string\n", query, "\n")
 
-# Print the list of unique XML tags
-print(tags)
+  # get the IDs and pubmed data for query string, parse as xml
+  ids <- get_pubmed_ids(query)
+  results <- fetch_pubmed_data(dami_on_pubmed)
+  results_as_xml <- read_xml(results)
 
-# create empty lists to contain ids, dois, years, titles
+  # Parsing XML into a dataframe
+  # get the relevant XML tags from here: https://www.ncbi.nlm.nih.gov/books/NBK3828/#publisherhelp.XML_Tag_Descriptions
+  results_df <- results_as_xml %>%
+    xml_find_all("//Article") %>%
+    map_df( ~ {
+      tibble(
+        PublisherName = xml_find_first(., "Journal/PublisherName") %>% xml_text(trim = TRUE),
+        JournalTitle = xml_find_first(., "Journal/JournalTitle") %>% xml_text(trim = TRUE),
+        Volume = xml_find_first(., "Journal/Volume") %>% xml_text(trim = TRUE),
+        ArticleIdList = xml_find_all(., "ArticleIdList/ArticleId") %>%
+          xml_text(trim = TRUE) %>%
+          paste(collapse = ", "),
+        Issue = xml_find_first(., "Journal/Issue") %>% xml_text(trim = TRUE),
+        Year = xml_find_first(., "PubDate/Year") %>% xml_text(trim = TRUE),
+        ArticleTitle = xml_find_first(., "ArticleTitle") %>% xml_text(trim = TRUE),
+        FirstAuthorFirstName = xml_find_first(., "AuthorList/Author[1]/FirstName") %>% xml_text(trim = TRUE),
+        FirstAuthorLastName = xml_find_first(., "AuthorList/Author[1]/LastName") %>% xml_text(trim = TRUE),
+        Abstract = xml_find_first(., "Abstract") %>% xml_text(trim = TRUE),
+        PMID = xml_find_first(., "ArticleIdList/ArticleId[@IdType='pubmed']") %>% xml_text(trim = TRUE),
+        DOI = xml_find_first(., "ArticleIdList/ArticleId[@IdType='doi']") %>% xml_text(trim = TRUE),
+      )
+    })
 
-pubmed_ids <- list()
-dois <- list()
-years <- list()
-titles <- list()
+  # write df to csv
+  # Write dataframe to csv
+  # we're also replacing spaces with underscores for the file names
+  fname <- sprintf("./data/Results_%s_%s.csv", i, association)
+  write.csv(results_df, fname, row.names = FALSE)
+  cat("Saved Dataframe to", fname, '\n')
 
-for (article in my_abstracts_xml) {
-  # Extract the information using custom_grep() and the corresponding tags
-  pubmed_id <- custom_grep(article, tag = "PMID")
-  year <- custom_grep(article, tag = "Year")
-  title <- custom_grep(article, tag = "Title")
-
-  # Append the extracted information to the respective lists
-  pubmed_ids <- append(pubmed_ids, pubmed_id)
-  years <- append(years, year)
-  titles <- append(titles, title)
+  # put a `break` here if you just want to try this on the first journal. The whole thing takes a while
+  break
 }
-
-print(pubmed_ids)
-print(years)
-print(titles)
