@@ -4,7 +4,6 @@ secrets.R
 .RData
 .Ruserdata
 data-raw/*
-!data-raw/*.R
 data/*
 docs
 .DS_Store
