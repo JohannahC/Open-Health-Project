@@ -57,7 +57,7 @@ for (i in seq_along(medical_associations)) {
   # get the relevant XML tags from here: https://www.ncbi.nlm.nih.gov/books/NBK3828/#publisherhelp.XML_Tag_Descriptions
   results_df <- results_as_xml %>%
     xml_find_all("//Article") %>%
-    map_df( ~ {
+    map_df(~ {
       tibble(
         PublisherName = xml_find_first(., "Journal/PublisherName") %>% xml_text(trim = TRUE),
         JournalTitle = xml_find_first(., "Journal/JournalTitle") %>% xml_text(trim = TRUE),
@@ -84,5 +84,8 @@ for (i in seq_along(medical_associations)) {
   cat("Saved Dataframe to", fname, '\n')
 
   # put a `break` here if you just want to try this on the first journal. The whole thing takes a while
-  break
+  if (i == 3) {
+    break
+  }
+
 }
