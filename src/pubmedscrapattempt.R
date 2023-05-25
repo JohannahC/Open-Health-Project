@@ -9,8 +9,6 @@ library(xml2)
 library(jsonlite)
 library(tidyverse)
 
-
-
 medical_associations <- c(
   "American Heart Association",
   "American College of Cardiology",
@@ -38,14 +36,16 @@ medical_associations <- c(
 for (i in seq_along(medical_associations)) {
   # store the association name in a variable so we can access it more conveniently
   association <- medical_associations[i]
+  cat("Running over", i, association, '\n')
 
   # build query string
-  cat("Running over", i, association, '\n')
   query <-
     sprintf(
       '("2013/01/01"[Date - Publication] : "2023/12/31"[Date - Publication]) AND ("diabetes"[Title/Abstract]) AND (("Practice Guideline"[Publication Type]) OR "guideline"[Title/Abstract] OR "consensus"[Title/Abstract]) AND ("%s")',
       association
     )
+
+  # print the query string here, make sure it is correct
   cat("Full query string\n", query, "\n")
 
   # get the IDs and pubmed data for query string, parse as xml
@@ -53,7 +53,7 @@ for (i in seq_along(medical_associations)) {
   results <- fetch_pubmed_data(dami_on_pubmed)
   results_as_xml <- read_xml(results)
 
-  # Parsing XML into a dataframe
+  # Parsing XML into dataframe
   # get the relevant XML tags from here: https://www.ncbi.nlm.nih.gov/books/NBK3828/#publisherhelp.XML_Tag_Descriptions
   results_df <- results_as_xml %>%
     xml_find_all("//Article") %>%
@@ -76,14 +76,14 @@ for (i in seq_along(medical_associations)) {
       )
     })
 
-  # write df to csv
-  # Write dataframe to csv
-  # we're also replacing spaces with underscores for the file names
+  # write dataframe to csv in `./data` dir
   fname <- sprintf("./data/Results_%s_%s.csv", i, association)
   write.csv(results_df, fname, row.names = FALSE)
   cat("Saved Dataframe to", fname, '\n')
 
-  # put a `break` here if you just want to try this on the first journal. The whole thing takes a while
+  # this condition means it breaks after the third iteration
+  # if you want to try this out on a few associations before running the full thing
+  # just comment out the `break` line with `#` to run over all
   if (i == 3) {
     break
   }
