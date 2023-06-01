@@ -94,7 +94,7 @@ for (i in seq_along(medical_associations)) {
   # if you want to try this out on a few associations before running the full thing
   # just comment out the `break` line with `#` to run over all
   if (i == 1) {
-    # break
+    #break
   }
 
 }
