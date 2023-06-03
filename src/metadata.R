@@ -57,6 +57,7 @@ authors_clean <- my_dois_works %>%
   select(doi, title, container.title, issued, given, family, suffix, affiliation.name,
          affiliation1.name,affiliation2.name, affiliation3.name,ORCID, link, url)
 
+#unnest the link variable and only extrac the URL as link_url
 authors_clean <- authors_clean %>%
   mutate(link_url = map_chr(link, ~pluck(., "URL")[1])) %>%
   select(-link)
