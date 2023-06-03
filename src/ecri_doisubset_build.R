@@ -16,22 +16,21 @@ view(ecri_all)
 # How many links likely contain the DOI already?:
 
 # 1. count the number of links containing "10." (the DOI start)
-num_dois1 <- sum(grepl("10.", ecri_all$link))
+num_dois1 <- sum(grepl("10\\.", ecri_all$link))
 print(num_dois1)
-# answer = 976 (guessing there are a bunch of random "10."s included, even if not part of a doi)
+# answer = 601
 
-# 2. count the number of links containing the string "doi" 
+# 2. count the number of links containing the string "doi"
 num_dois2 <- sum(grepl("doi", ecri_all$link))
 print(num_dois2)
 # answer = 497
-#difference in links with "10." and "doi" (976-497 = 479)
 
 # 3. count the number of unique links that have either a "doi" or a "10."
 test <- ecri_all %>% filter(grepl("doi|10\\.", link))
 print(test)
 # rows = 601
 
-# 4. try to make sense of all these discrepancies:
+# 4. Explore these
 subset1 <- ecri_all %>% filter(grepl("10\\.", link))
 subset2 <- ecri_all %>% filter(grepl("doi", link))
 nrow(subset1)
@@ -59,7 +58,7 @@ view(subset3)
 
 # 2. extract based on matched string elements:
 #     - define a pattern for the regular expression function
-#     - the pattern is: starts with "10." followed by any number of any characters (".*"), 
+#     - the pattern is: starts with "10." followed by any number of any characters (".*"),
 #     - then a slash ("/"), then any number of any characters (".*")
 pattern <- "10\\.[0-9]+/.+"
 
@@ -81,7 +80,7 @@ subset3 <- subset3[, !names(subset3) %in% "doi"]
 #rename dois column in subset 3 to doi
 subset3 <- rename(subset3,doi = dois)
 view(subset3)
-              
+
 # still a bunch of dois missing - and I want to learn more
 s3_na_rows <- subset(subset3, is.na(doi))
 view(s3_na_rows)
@@ -96,7 +95,7 @@ print(subset3$professional_medical_society)
 pattern <- "10\\.[0-9]+/.+"
 doi <- stringr::str_extract(subset2$link, pattern)
 print(doi)
-#this looks pretty good! a couple won't be caught but the majority will be fine 
+#this looks pretty good! a couple won't be caught but the majority will be fine
 
 #clean subset2 - extract the stuff that comes after the doi (ie. /attachement, /full, .pdf, "?", "&", etc)
 cleaned_dois <- gsub("/attachment.*|/full.*|\\.pdf.*|\\?.*|\\&.*", "", doi)
