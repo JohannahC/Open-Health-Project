@@ -30,34 +30,42 @@ library(stringr)
 # "ecri_doisubset_build.R" is the script that identified and pulled doi strings from the urls in "ecri_all.csv" and is therefore a subset of all the ECRI guidelines received from Lisa Haskell @ the ECRI Guidelines Trust
 
 
-### now just manually editing authors_clean as an alternate attempt:
+# read in data
+authors_all <- read.csv("authors_clean.csv")
 
-authors_all <- authors_clean
+
+# Sort guidelines by year (newest at top)
 # Extract the year from the "issued" column
 authors_all$year <- str_extract(authors_all$issued, "^\\d{4}")
 
 # arrange authors_all by year of publication and then by journal name (container.title)
+# going for AHA journals first (like "Stroke" and "Circulation") because they list author credentials in their PDF versions
+# (easy to screen)
 authors_all <- authors_all %>%
   arrange(desc(year), .by_group = TRUE) %>%
   group_by(container.title)
 View(authors_all)
 
-#add a variable for author's NPI eligibility
+#add eligibility-relevant columns
 authors_all <- authors_all %>%
   mutate(npi_eligible = TRUE,
          non_physician_prescriber = FALSE,
          prescriber_credential = NA)
 
-#rename first column to rowid
-authors_all <- rename(authors_all, rowid = ...1)
+#rename first column "X" to rowid (this is different from nrow!!!)
+authors_all <- rename(authors_all, rowid = "X")
 
 #proceed manually by checking the publication for medical credential & listing:
 #criteria here:
 
 #1. identify if author has a prescribing credential (MD, DO, DDS, PA, NP, DNP, RN, LPN, APRN ). If yes but person is non-MD or non-DO, set non_physician_prescriber = TRUE
 #2. check full disclosure table or internet to see if author is US-based (ie. US employer)
-#3. if author has non-US employer, google to see if they maybe now have a US employer - NPI search them
-#   if 1 & 2 are TRUE or if 1 & 3 are TRUE, it is assumed author is in the NPI registry and "npi_eligible = TRUE"
+#3. if author has non-US employer, google them anyway to double check they have never worked/studied in the US. (Esp. canadian-affiliated authors)
+
+#Rules:
+
+#   if 1 & 2 = TRUE (prescriber, US) it is assumed author is in the NPI registry and "npi_eligible = TRUE"
+#   if 1 = TRUE and 2 = FALSE but 3 = TRUE (ie. prescriber, non-US employer, previous US-prescriber employment/education), it is assumed author is in the NPI registry and "npi_eligible = TRUE"
 
 # for authors on doi "10.1161/str.0000000000000436":
 authors_all[authors_all$rowid %in% 713:723, "npi_eligible"] <- TRUE
@@ -98,16 +106,16 @@ authors_all[authors_all$rowid == 488, c("npi_eligible", "non_physician_prescribe
 authors_all[authors_all$rowid == 457, c("prescriber_credential")] <- "DO"
 
 #ineligible due to non-US status:
-authors_all[authors_all$rowid == 448, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
-authors_all[authors_all$rowid == 451, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
-authors_all[authors_all$rowid == 453, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
-authors_all[authors_all$rowid == 454, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
-authors_all[authors_all$rowid == 456, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
-authors_all[authors_all$rowid == 458, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
-authors_all[authors_all$rowid == 459, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
-authors_all[authors_all$rowid == 473, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, "MD")
+authors_all[authors_all$rowid == 448, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 451, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 453, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 454, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 456, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 458, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 459, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 473, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
 
-
+View(authors_all)
 # date verified - don't alter unless re-verifying all
 # authors_all[authors_all$rowid %in% c(445:492), "date_npi_eligibility_verified"] <- Sys.Date()
 
