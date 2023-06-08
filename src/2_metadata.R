@@ -1,4 +1,6 @@
 # Calling CrossRef metadata using a DOI list
+# this script generates "authors_clean.csv" which contains author metadata for the authors in
+# "ecri_doisubset.csv"
 
 #polite use of the CrossRef API means that you give them your email.
 #Run this line, add your email to it, save the file and restart your R session

@@ -52,6 +52,7 @@ for (i in seq_along(medical_associations)) {
     # print the query string here, make sure it is correct
     cat("Full query string\n", query, "\n")
 
+<<<<<<< Updated upstream
     # get the IDs and pubmed data for query string, parse as xml
     ids <- get_pubmed_ids(query)
     results <- fetch_pubmed_data(ids)
@@ -64,6 +65,12 @@ for (i in seq_along(medical_associations)) {
   } else {
     results_as_xml = read_xml(sprintf("data/Results_%s_%s.xml", i, association))
   }
+=======
+  # get the IDs and pubmed data for query string, parse as xml
+  ids <- get_pubmed_ids(query)
+  results <- fetch_pubmed_data(ids)
+  results_as_xml <- read_xml(results)
+>>>>>>> Stashed changes
 
   # Parsing XML into dataframe
   # get the relevant XML tags from here: https://www.ncbi.nlm.nih.gov/books/NBK3828/#publisherhelp.XML_Tag_Descriptions
@@ -86,7 +93,11 @@ for (i in seq_along(medical_associations)) {
     })
 
   # write dataframe to csv in `./data` dir
+<<<<<<< Updated upstream
   fname <- sprintf("data/Results_%s_%s.csv", i, association)
+=======
+  fname <- sprintf("../data/Results_%s_%s.csv", i, association)
+>>>>>>> Stashed changes
   write.csv(results_df, fname, row.names = FALSE)
   cat("Saved Dataframe to", fname, '\n')
 
