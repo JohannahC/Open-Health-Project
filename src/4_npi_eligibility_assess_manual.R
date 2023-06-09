@@ -50,7 +50,8 @@ View(authors_all)
 authors_all <- authors_all %>%
   mutate(npi_eligible = TRUE,
          non_physician_prescriber = FALSE,
-         prescriber_credential = NA)
+         prescriber_credential = NA,
+         employment_country = NA) # NA = US
 
 #rename first column "X" to rowid (this is different from nrow!!!)
 authors_all <- rename(authors_all, rowid = "X")
@@ -58,7 +59,7 @@ authors_all <- rename(authors_all, rowid = "X")
 #proceed manually by checking the publication for medical credential & listing:
 #criteria here:
 
-#1. identify if author has a prescribing credential (MD, DO, DDS, PA, NP, DNP, RN, LPN, APRN ). If yes but person is non-MD or non-DO, set non_physician_prescriber = TRUE
+#1. identify if author has a prescribing credential (MD, DO, DDS, PA, NP, DNP, RN, LPN, APRN, MSN). If yes but person is non-MD or non-DO, set non_physician_prescriber = TRUE ** note to self ** MSN may signal NP - double check. Remove non-prescribers here - RN, LPN, RRT status from those who have it
 #2. check full disclosure table or internet to see if author is US-based (ie. US employer)
 #3. if author has non-US employer, google them anyway to double check they have never worked/studied in the US. (Esp. canadian-affiliated authors)
 
@@ -74,8 +75,8 @@ authors_all[authors_all$rowid == 725, c("npi_eligible", "non_physician_prescribe
 authors_all[authors_all$rowid %in% 726:733, "npi_eligible"] <- TRUE
 authors_all[authors_all$rowid %in% c(713:723, 726:733), "prescriber_credential"] <- "MD"
 
-# date verified - don't alter unless re-verifying all
-# authors_all[authors_all$rowid %in% c(713:733), "date_npi_eligibility_verified"] <- Sys.Date()
+# date verified - don't alter unless re-verifying
+authors_all[authors_all$rowid %in% c(713:733), "date_npi_eligibility_verified"] <- "2023-06-08"
 
 #for authors on doi "10.1161/cir.0000000000001063":
 authors_all[authors_all$rowid %in% c(62, 67, 78, 82), "npi_eligible"] <- FALSE
@@ -84,7 +85,7 @@ authors_all[authors_all$rowid == 75, c("npi_eligible", "non_physician_prescriber
 authors_all[authors_all$rowid %in% c(58:74, 76:80, 82:83), "prescriber_credential"] <- "MD"
 
 # date verified - don't alter unless re-verifying all
-#authors_all[authors_all$rowid %in% c(58:83), "date_npi_eligibility_verified"] <- Sys.Date()
+authors_all[authors_all$rowid %in% c(58:83), "date_npi_eligibility_verified"] <- "2023-06-08"
 
 # for authors on doi: "10.1161/cir.0000000000001038"
 authors_all[authors_all$rowid == 88, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
@@ -95,33 +96,152 @@ authors_all[authors_all$rowid == 102, c("npi_eligible", "non_physician_prescribe
 authors_all[authors_all$rowid %in% c(84:87, 90:97, 99:101, 103:107), "prescriber_credential"] <- "MD"
 
 # date verified - don't alter unless re-verifying all
-#authors_all[authors_all$rowid %in% c(84:107), "date_npi_eligibility_verified"] <- Sys.Date()
+authors_all[authors_all$rowid %in% c(84:107), "date_npi_eligibility_verified"] <- "2023-06-08"
+
 
 #for authors on doi: 10.1161/circoutcomes.122.008900
+
+#assign MD credential to relevant authors:
+authors_all[authors_all$rowid %in% c(445:492), "prescriber_credential"] <- "MD"
+
+#adjust those who aren't MD
 authors_all[authors_all$rowid == 464, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(TRUE, TRUE, "RRT")
-authors_all[authors_all$rowid == 472, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 472, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, NA)
 authors_all[authors_all$rowid == 482, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(TRUE, TRUE, "RN")
-authors_all[authors_all$rowid == 486, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 486, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, NA)
 authors_all[authors_all$rowid == 488, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(TRUE, TRUE, "RRT")
 authors_all[authors_all$rowid == 457, c("prescriber_credential")] <- "DO"
 
 #ineligible due to non-US status:
-authors_all[authors_all$rowid == 448, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
-authors_all[authors_all$rowid == 451, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
-authors_all[authors_all$rowid == 453, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
-authors_all[authors_all$rowid == 454, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
-authors_all[authors_all$rowid == 456, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
-authors_all[authors_all$rowid == 458, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
-authors_all[authors_all$rowid == 459, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
-authors_all[authors_all$rowid == 473, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "non_us_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 448, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 451, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 453, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 454, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 456, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 458, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 459, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 473, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+# one other Canada-employed author but former US doctor with NPI (Garth Meckler)
+
+test <- subset(authors_all, rowid %in% c(445:492))
+View(test)
 
 View(authors_all)
 # date verified - don't alter unless re-verifying all
-# authors_all[authors_all$rowid %in% c(445:492), "date_npi_eligibility_verified"] <- Sys.Date()
+authors_all[authors_all$rowid %in% c(445:492), "date_npi_eligibility_verified"] <- "2023-06-08"
 
-subset_authors <- authors_all[authors_all$rowid %in% 445:492, ]
+# for authors on doi: 10.1161/str.0000000000000375:
+authors_all[authors_all$rowid == 625, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 630, c("npi_eligible", "non_physician_prescriber", "employment_country")] <- list(FALSE, FALSE, "IE")
+authors_all[authors_all$rowid %in% c(620:624, 626:629, 631:638), "prescriber_credential"] <- "MD"
+
+# date verified - don't alter unless re-verifying all
+authors_all[authors_all$rowid %in% c(620:638), "date_npi_eligibility_verified"] <- "2023-06-08"
+View(authors_all)
+
+# for authors on doi: 10.1161/cir.0000000000001029
+
+authors_all[authors_all$rowid == 644, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(TRUE, TRUE, "PharmD")
+authors_all[authors_all$rowid == 648, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(TRUE, TRUE, "RN")
+authors_all[authors_all$rowid == 660, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+
+# non-US
+authors_all[authors_all$rowid == 650, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "IT")
+authors_all[authors_all$rowid == 651, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "UK")
+
+# assign MD status to everyone else
+authors_all[authors_all$rowid %in% c(639:643, 645:647, 649:659), "prescriber_credential"] <- "MD"
+
+#date verified
+authors_all[authors_all$rowid %in% c(639:660), "date_npi_eligibility_verified"] <- "2023-06-08"
+View(authors_all)
+
+# for authors on doi: 10.1161/cir.0000000000001031
+
+#all these people are Registered Dieticians (R.D. - npi technically eligible but no prescribing rights so listed here as false, false - this is inconsistent with the RNs, LPN, and RRTs above who also have no prescribing rights - need decision on this)
+
+authors_all[authors_all$rowid == 661, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 663, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 665, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 666, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 669, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+authors_all[authors_all$rowid == 670, c("npi_eligible", "non_physician_prescriber")] <- list(FALSE, FALSE)
+
+#assign all others MD
+# assign MD status to everyone else
+authors_all[authors_all$rowid %in% c(662, 664, 667, 668), "prescriber_credential"] <- "MD"
+
+#date verified
+authors_all[authors_all$rowid %in% c(661:671), "date_npi_eligibility_verified"] <- "2023-06-08"
+View(authors_all)
+
+# for authors on doi: 10.1161/cir.0000000000000901
+# the metadata scrape for this doi included Acknowledged collaborators - I did not include them here, thus half the authors look empty but they aren't
+authors_all[authors_all$rowid == 316, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, NA)
+authors_all[authors_all$rowid == 318, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, NA)
+
+# non-US
+authors_all[authors_all$rowid == 310, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 311, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+authors_all[authors_all$rowid == 315, c("npi_eligible", "non_physician_prescriber", "prescriber_credential", "employment_country")] <- list(FALSE, FALSE, "MD", "CA")
+# one other Canadian employed author but former US doctor with NPI (Garth Meckler)
+
+# assign MD status to everyone else
+authors_all[authors_all$rowid %in% c(307:309, 312:314, 317, 319), "prescriber_credential"] <- "MD"
+
+# handling acknowledged authors that got listed in the metadata anyways:
+authors_all[authors_all$rowid %in% c(320:335), c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, NA)
+
+subset_authors <- authors_all[authors_all$rowid %in% 307:335, ]
 print(subset_authors, n = 60)
 View(subset_authors)
+
+#date verified
+authors_all[authors_all$rowid %in% c(307:335), "date_npi_eligibility_verified"] <- "2023-06-09"
+View(authors_all)
+
+# for authors on doi: 10.1161/cir.0000000000001106
+
+#new practice of assigning med status first then addressing unique non-MDs
+authors_all[authors_all$rowid %in% c(672:679, 681:692, 694:696, 698:700), "prescriber_credential"] <- "MD"
+
+authors_all[authors_all$rowid == 680, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, NA)
+authors_all[authors_all$rowid == 693, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(TRUE, TRUE, "NP")
+authors_all[authors_all$rowid == 697, c("npi_eligible", "non_physician_prescriber", "prescriber_credential")] <- list(FALSE, FALSE, NA)
+
+#date verified
+authors_all[authors_all$rowid %in% c(672:700), "date_npi_eligibility_verified"] <- "2023-06-09"
+View(authors_all)
+
+# for authors on doi: 10.1016/j.jacc.2019.10.002
+
+#everyone a doctor and US based - MBBS = foreign MD
+# assign MD status to everyone else
+authors_all[authors_all$rowid %in% c(493:522), "prescriber_credential"] <- "MD"
+
+#date verified
+authors_all[authors_all$rowid %in% c(493:522), "date_npi_eligibility_verified"] <- "2023-06-09"
+View(authors_all)
+
+subset_authors <- authors_all[authors_all$rowid %in% 493:522, ]
+print(subset_authors, n = 60)
+View(subset_authors)
+
+# for authors on doi:
+
+# quality check - run after each new addition
+verified_subset <- authors_all %>%
+  filter(!is.na(date_npi_eligibility_verified))
+View(verified_subset)
+
+num_unique_doi <- length(unique(verified_subset$doi))
+print(num_unique_doi)
+
+subset_authors <- authors_all[authors_all$rowid %in% 672:700, ]
+print(subset_authors, n = 60)
+View(subset_authors)
+
+write_csv(verified_subset, "screened_authors_sample.csv")
 
 ##### what I tried first - now moved below: ########
 
@@ -226,112 +346,8 @@ View(subset_authors)
 #authors_all[4, "affiliation_found"] <- NA
 #authors_all[4, "faculty_page"] <- "https://www.cbhd.org/people/monique-chireau"
 #authors_all[4, "verification_other"] <- "https://opennpi.com/provider/1255417515"
-authors_all[4, "other_names"] <- "Monique Chireau Wubbenhorst"
-authors_all[4, "npi_eligible"] <- TRUE
-
-# Wende N.Fedder
-#authors_all[5, "npi"] <-
-#authors_all[5, "npi_verified"] <-
-#authors_all[5, "affiliation_found"] <- ""
-#authors_all[5, "faculty_page"] <- ""
-#authors_all[5, "practitioner_page"] <- ""
-#authors_all[5, "contact1"] <- ""
-
-# Karen L.Furie
-#authors_all[6, "npi"] <-
-#authors_all[6, "npi_verified"] <-
-#authors_all[6, "affiliation_found"] <- ""
-#authors_all[6, "faculty_page"] <- ""
-#authors_all[6, "practitioner_page"] <- ""
-#authors_all[6, "contact1"] <- ""
-
-#7
-#authors_all[7, "npi"] <-
-#authors_all[7, "npi_verified"] <-
-#authors_all[7, "affiliation_found"] <- ""
-#authors_all[7, "faculty_page"] <- ""
-#authors_all[7, "practitioner_page"] <- ""
-#authors_all[7, "contact1"] <- ""
+#authors_all[4, "other_names"] <- "Monique Chireau Wubbenhorst"
+#authors_all[4, "npi_eligible"] <- TRUE
 
 
-#8
-#authors_all[8, "npi"] <-
-#authors_all[8, "npi_verified"] <-
-#authors_all[8, "affiliation_found"] <- ""
-#authors_all[8, "faculty_page"] <- ""
-#authors_all[8, "practitioner_page"] <- ""
-#authors_all[8, "contact1"] <- ""
-
-#9
-#authors_all[9, "npi"] <-
-#authors_all[9, "npi_verified"] <-
-#authors_all[9, "affiliation_found"] <- ""
-#authors_all[9, "faculty_page"] <- ""
-#authors_all[9, "practitioner_page"] <- ""
-#authors_all[9, "contact1"] <- ""
-
-
-#10
-#authors_all[10, "npi"] <-
-#authors_all[10, "npi_verified"] <-
-#authors_all[10, "affiliation_found"] <- ""
-#authors_all[10, "faculty_page"] <- ""
-#authors_all[10, "practitioner_page"] <- ""
-#authors_all[10, "contact1"] <- ""
-
-#11
-#authors_all[11, "npi"] <-
-#authors_all[11, "npi_verified"] <-
-#authors_all[11, "affiliation_found"] <- ""
-#authors_all[11, "faculty_page"] <- ""
-#authors_all[11, "practitioner_page"] <- ""
-#authors_all[11, "contact1"] <- ""
-
-#12
-#authors_all[12, "npi"] <-
-#authors_all[12, "npi_verified"] <-
-#authors_all[12, "affiliation_found"] <- ""
-#authors_all[12, "faculty_page"] <- ""
-#authors_all[12, "practitioner_page"] <- ""
-#authors_all[12, "contact1"] <- ""
-
-#13
-#authors_all[13, "npi"] <-
-#authors_all[13, "npi_verified"] <-
-#authors_all[13, "affiliation_found"] <- ""
-#authors_all[13, "faculty_page"] <- ""
-#authors_all[13, "practitioner_page"] <- ""
-#authors_all[13, "contact1"] <- ""
-
-#14
-#authors_all[14, "npi"] <-
-#authors_all[14, "npi_verified"] <-
-#authors_all[14, "affiliation_found"] <- ""
-#authors_all[14, "faculty_page"] <- ""
-#authors_all[14, "practitioner_page"] <- ""
-#authors_all[14, "contact1"] <- ""
-
-#15
-#authors_all[15, "npi"] <-
-#authors_all[15, "npi_verified"] <-
-#authors_all[15, "affiliation_found"] <- ""
-#authors_all[15, "faculty_page"] <- ""
-#authors_all[15, "practitioner_page"] <- ""
-#authors_all[15, "contact1"] <- ""
-
-#16
-#authors_all[16, "npi"] <-
-#authors_all[16, "npi_verified"] <-
-#authors_all[16, "affiliation_found"] <- ""
-#authors_all[16, "faculty_page"] <- ""
-#authors_all[16, "practitioner_page"] <- ""
-#authors_all[16, "contact1"] <- ""
-
-#17
-#authors_all[17, "npi"] <-
-#authors_all[17, "npi_verified"] <-
-#authors_all[17, "affiliation_found"] <- ""
-#authors_all[17, "faculty_page"] <- ""
-#authors_all[17, "practitioner_page"] <- ""
-#authors_all[17, "contact1"] <- ""
 
