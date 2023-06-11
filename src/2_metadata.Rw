@@ -1,5 +1,5 @@
 # Calling CrossRef metadata using a DOI list
-# this script generates "authors_clean.csv" which contains author metadata for the authors in
+# this script generates "authors_clean.csv" which contains author metadata for the authors of Amherican Heart Association DOIs in
 # "ecri_doisubset.csv"
 
 #polite use of the CrossRef API means that you give them your email.
