@@ -3,7 +3,8 @@ secrets.R
 .Rhistory
 .RData
 .Ruserdata
-data-raw/*
 data/*
 docs
 .DS_Store
+data-raw/payments
+data-raw/*.zip
