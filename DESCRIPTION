@@ -2,9 +2,9 @@ Package: coi
 Title: Showing Pharma Payments to Writers of Medical Guidelines
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Johannah", "Cramer", , , role=c("aut", "cre"),
+    person("Johannah", "Cramer", email="cramer.johannah@gmail.com", role=c("aut", "cre"),
            comment = c(ORCID = "https://orcid.org/0000-0003-0345-7711")),
-    person("Jo", "Kroese", , "jo@jokroese.com", role = c("aut", "cre"),
+    person("Jo", "Kroese", email="jo@jokroese.com", role = c("aut"),
            comment = c(ORCID = "https://orcid.org/0000-0001-6995-6797"))
            )
 Description: The goal of coi is to show pharma payments to writers of medical guidelines. The focus is on the creation of a dataset.
