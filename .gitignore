@@ -8,3 +8,7 @@ docs
 .DS_Store
 data-raw/payments
 data-raw/*.zip
+data-raw/npi
+src/*protocol_cache
+src/*html
+src/*.rds
