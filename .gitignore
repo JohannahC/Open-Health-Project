@@ -12,3 +12,5 @@ data-raw/npi
 src/*protocol_cache
 src/*html
 src/*.rds
+*.rdx
+*.rdb
