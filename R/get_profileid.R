@@ -7,8 +7,14 @@
 #' 
 
 clean_verified_npis <- function(dataset) {
-  dataset <- dataset[!is.na(dataset$number), ]  # Remove rows with NA in 'number' column
-  dataset <- dataset[!duplicated(dataset$number), ]  # Remove duplicate rows based on 'number' column
+  if (!"number" %in% names(dataset)) {
+    stop("The dataset does not have a 'number' column.")
+  }
+  
+  dataset <- dataset %>%
+    filter(!is.na(number)) %>%  # Remove rows with NA in 'number' column
+    filter(!duplicated(number))  # Remove duplicate rows based on 'number' column
+  
   return(dataset)
 }
 
@@ -22,10 +28,16 @@ clean_verified_npis <- function(dataset) {
 #' 
 
 clean_physician_supplement <- function(dataset) {
-  # Convert NPI column to character
+  # Check if the 'Covered_Recipient_NPI' column exists
+  if (!"Covered_Recipient_NPI" %in% names(dataset)) {
+    stop("The dataset does not have a 'Covered_Recipient_NPI' column.")
+  }
+  
   dataset$Covered_Recipient_NPI <- as.character(dataset$Covered_Recipient_NPI)
-  # Filter non-missing NPI numbers
-  dataset <- dataset[!is.na(dataset$Covered_Recipient_NPI), ]
+  
+  # Use dplyr to filter out NA rows
+  dataset <- dataset %>% filter(!is.na(Covered_Recipient_NPI))
+  
   return(dataset)
 }
 
