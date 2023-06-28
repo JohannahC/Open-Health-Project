@@ -1,8 +1,7 @@
 #' clean verified npis
 #'
-#' @param dataset of verified npis (in our case, "verified_sample.rds")
-#' @return vector list of unique npis - missings & duplicates removed for passing through get_profile_ids
-#' @export
+#' @param dataset where verified npis are stored in column "number" (ie. "verified_sample.rds")
+#' @return cleaned version of the dataset with missings & duplicates removed for ease of use with get_profile_ids()
 #' @examples
 #' 
 
@@ -22,7 +21,7 @@ clean_verified_npis <- function(dataset) {
 #'
 #' @param dataset - Covered Recipient Supplement File for All Program Years
 #' available at: https://www.cms.gov/OpenPayments/Data/Dataset-Downloads
-#' @return cleaned dataset
+#' @return cleaned version of this dataset - ie. filters out missing NPIs (~7k) & converts NPI to string
 #' @export
 #' @examples
 #' 
