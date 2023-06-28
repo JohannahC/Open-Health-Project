@@ -52,5 +52,5 @@ clean_physician_supplement <- function(dataset) {
 
 get_profile_ids <- function(dataset1, dataset2) {
   profile_ids <- dataset1[dataset1$Covered_Recipient_NPI %in% dataset2$number, ]
-  return(profiled_ids)
-}
+  return(profile_ids)
+} 
