@@ -49,6 +49,11 @@ print(verified_matches[verified_matches$rowid == 721, "number"])
 verified_matches[verified_matches$rowid == 724, "number"] <- NA
 print(verified_matches[verified_matches$rowid == 724, "number"])
 
+# 730 - Christopher J. Stapleton - 1083908099
+
+verified_matches[verified_matches$rowid == 730, "number"] <- "1083908099"
+print(verified_matches[verified_matches$rowid == 730, "number"])
+
 # 731- Jose I. Suarez - 1396763785
 
 verified_matches[verified_matches$rowid == 731, "number"] <- "1396763785"
