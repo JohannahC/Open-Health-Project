@@ -1,3 +1,5 @@
+## WIP ## 30.06.2023
+
 # isolating profile ids and then using them to find relevant payments in 2021 general, research and ownership payments
 
 # Phase 1 - prepare base data (npis and profile ids)
@@ -8,7 +10,7 @@
 
 # Phase 2 - use profile IDs to gather all payment records (general, research, ownership) for each year
 
-# 4. run get_payment_records() -- repeat for each year 
+# 4. run get_payment_records() -- repeat for each year
 # 5. explore data
 # 6. bind datasets by year? write csv? repeat for all years?
 
@@ -17,18 +19,18 @@ library(tidyverse)
 
 # Phase 1
 # Load necessary base data (only once)
-verified <- read_rds("/Users/johannahcramer/Documents/GitHub/coi/src/verified_sample.rds")
-supplement <- read.csv("/Users/johannahcramer/Documents/GitHub/coi/data-raw/OP_CVRD_RCPNT_PRFL_SPLMTL_P01202023.csv")
+verified <- read_rds("/src/verified_sample.rds")
+supplement <- read.csv("/data-raw/OP_CVRD_RCPNT_PRFL_SPLMTL_P01202023.csv")
 
 # Prep base data
 
-# 1. 
+# 1.
 verified_clean <- clean_verified_npis(verified)
 
-# 2. 
+# 2.
 supplement_clean <- clean_physician_supplement(supplement)
 
-# 3. 
+# 3.
 profiles <- get_profile_ids(supplement_clean, verified_clean)
 
 # Phase 2
@@ -38,7 +40,7 @@ general_2021 <- read.csv("data-raw/OP_DTL_GNRL_PGYR2021_P01202023.csv")
 research_2021 <- read.csv("/Users/johannahcramer/Documents/GitHub/coi/data-raw/OP_DTL_RSRCH_PGYR2021_P01202023.csv")
 ownership_2021 <- read.csv("/Users/johannahcramer/Documents/GitHub/coi/data-raw/OP_DTL_OWNRSHP_PGYR2021_P01202023.csv")
 
-# 4. 
+# 4.
 general_payments_2021 <- get_payment_records(general_2021,profiles)
 research_payments_2021 <- get_payment_records(research_2021, profiles)
 ownership_payments_2021 <- get_payment_records(ownership_2021, profiles)
@@ -69,7 +71,7 @@ general_2020 <- read.csv("data-raw/OP_DTL_GNRL_PGYR2020_P01202023.csv")
 research_2020 <- read.csv("data-raw/OP_DTL_RSRCH_PGYR2020_P01202023.csv")
 ownership_2020 <- read.csv("data-raw/OP_DTL_OWNRSHP_PGYR2020_P01202023.csv")
 
-# 4. 
+# 4.
 general_payments_2020 <- get_payment_records(general_2020,profiles)
 research_payments_2020 <- get_payment_records(research_2020, profiles)
 ownership_payments_2020 <- get_payment_records(ownership_2020, profiles)
