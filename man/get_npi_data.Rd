@@ -4,7 +4,7 @@
 \alias{get_npi_data}
 \title{Get NPI data}
 \usage{
-get_npi_data(first_name, last_name)
+get_npi_data(first_name, last_name, initial, middle_name)
 }
 \arguments{
 \item{last_name}{}

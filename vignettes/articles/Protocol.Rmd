@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-This document outlines the protocol for building the Industry Relationships in Guidelines (i-rig) dataset - which offers a way to explore corporate influence on the development of US clinical practice guidelines. For each guideline, I-RIG contains a history of the payments and gifts received (since 2013) by any author of an included guideline who's able to prescribe medication in the US.
+This document outlines the protocol for building the Industry Relationships in Guidelines (I-RIG) dataset - which offers a way to explore corporate influence on the development of US clinical practice guidelines. For each guideline, I-RIG contains a history of the payments and gifts received (since 2013) by any author of an included guideline, provided they have US-prescribing rights. 
 
 ## The protocol
 
@@ -27,7 +27,7 @@ To illustrate these steps, this document will walk through the data construction
 
 ### Step 1: find the guideline
 
-The guideline is the starting point of all further data construction. We need it to figure out who the authors are, in order to then identify if and which payment records in Open Payments exist for these authors. 
+The guideline is the starting point of all further data construction. We need it to figure out who the authors are, in order to then identify if and which payment records exist for them in the US Open Payments database. 
 
 **Guidelines can be found in many places including:**
 
@@ -37,9 +37,9 @@ The guideline is the starting point of all further data construction. We need it
 
 **A focus on Digital Object Identifiers (DOI)**
 
-Because what we ultimately want from the guideline is a list of all it's authors (and because we're doing this at scale), we're looking for each guideline's DOI, which will allow us to easily extract metadata for the publication via an API. Therefore, we're focused on optimizing our approach (and thus this protocol) for ways that facilitate batch DOIs harvesting. Our starting point in this project is an excel file obtained from the ECRI Guidelines Trust, which contains a list of all ~3,000 guidelines contained in their database. Many, though not all, guideline URLs in this list contain the DOI directly within it. Example: <https://www.ahajournals.org/doi/epdf/10.1161/STR.0000000000000436> and we are able to extract the DOI from the string, and construct a DOI list that can be fed into the API call. 
+Because what we ultimately want from the guideline is a list of all it's authors (and because we're doing this at scale), we're looking for each guideline's DOI, which will allow us to easily extract metadata for the publication programmatically. Therefore, we're focused on optimizing our approach (and thus this protocol) for ways that facilitate batch DOI harvesting. Our starting point in this project is an excel file obtained from the ECRI Guidelines Trust, which contains a list of all ~3,000 guidelines contained in their database. Many, though not all, guideline URLs in this list contain the DOI directly within it. Example: <https://www.ahajournals.org/doi/epdf/10.1161/STR.0000000000000436> and we are able to extract the DOI from the string, and construct a DOI list that can be fed into an API call for the metadata. 
 
-That said, DOIs may not be the only way to organize guidelines and harvest author metadata. The NCCN, for example, does not publish their guidelines with DOIs - but their guidelines offer other ways of easily harvesting author names (ie. webscraping). Details on all the unique ways of batch executing Step 1 will be described elsewhere. 
+That said, DOIs may not be the best way to organize guidelines and harvest author metadata. The NCCN, for example, does not publish guidelines with DOIs, but their guidelines present other ways of harvesting author names (ie. webscraping). Details on all the unique ways of batch executing Steps 1 & 2 will be described elsewhere. 
 
 For now, let's proceed to step 2 with the DOI from our example guideline:
 
@@ -48,9 +48,11 @@ For now, let's proceed to step 2 with the DOI from our example guideline:
 
 ### Step 2: extract the author names and relevant metadata
 
-Step 2 consists of using the DOI to extract the metadata for the publication, in order to create a dataframe where each author gets their own row. The way to do this is to run the DOI through the Crossref API. Crossref maintains their API and there's an R package developed for easily accessing it **rcrossref**.
+The goal of Step 2 is to use our DOI to programmatically extract and organize the guideline's metadata, such that we end up with a dataset consisting of the unique authors of our document.
 
-These helpful **rcrossref** guides were used here:
+To do so, we run our DOI through the API developed and maintained by Crossref, one of the world's largest DOI registration agencies. Crossref's API allows anyone to access metadata associated with any of their own DOIs. Luckily, there's an R package (**rcrossref**) developed for accessing it.
+
+These **rcrossref** guides were helpful for this step:
 
 - Package/ Github repository <https://ciakovx.github.io/rcrossref.html#Searching_by_DOI>
 - Corresponding Youtube Tutorial <https://www.youtube.com/watch?v=dy-raTcj0no>
@@ -118,7 +120,7 @@ write.csv(authors_clean, "authors_clean.csv")
 
 The objective of Step 3 is to match each author with the correct unique National Provier Identifier, where an NPI is available. An NPI should be available in all cases where an author has prescribing rights in the US (ie. a doctor, nurse practitioner, pharmacist).
 
-To accurately match, we need to address the challenge of name variability between the name an author publishes under and the name the author registered their NPI with. Consider the fictitious author who publishes under the name "J. Michael Roberts", but who's NPI is registered as "John M. Roberts" or the author who's changed their last name after marriage, but continues to publish under their last name at birth. A simple name search in the NPI registry may mismatch or miss entirely these authors. 
+To accurately match, we need to address the challenge of name variability between the name an author publishes under and the name the author registered their NPI with. Consider the fictitious author who publishes under the name "J. Michael Roberts", but who's NPI is registered as "John M. Roberts", or the author who's changed their last name after marriage, but continues to publish under their last name at birth. A simple name search in the NPI registry may mismatch (or miss entirely) these authors. 
 
 To address this, this phase of the protocol necessitates both manual and programmatic work. 
 
@@ -180,7 +182,7 @@ Using the NPPES API, fetch potential NPI matches for the author, *iterating on a
 *non-manual*
 
     - If only one match is returned, assume it is the correct person.
-    - If multiple matches are returned, proceed to step 4.
+    - If multiple matches are returned, proceed to manual combing.
     
 *manual combing*  
 
@@ -205,7 +207,36 @@ If we cannot confidently identify the NPI match, make an attempt to email the pe
 
 ### Step 4: for each author, link NPI to [US Open Payments Data](https://openpaymentsdata.cms.gov/)
 
-linky link link
+The goal of Step 4 is to identify (and create a subset of) all the payment records in the Open Payment's database associated with each NPI on our verified list (finalized in Step 3). The Open Payments data is available for download at:  https://www.cms.gov/OpenPayments/Data/Dataset-Downloads.  
 
+Although there's also an API, at the time of writing it's not very user friendly, so we've opted to download all the raw data available at this link directly. Each "Program Year" download file represents all payment records for a given year, and contains three separate files of interest for us: the general payments file, the research payments file, and the ownership payments file. These are further defined in XXX, but they're generally self-explanatory. The *Covered Recipient Supplement File for All Program Years* (CRSF) contains information - demographic, specialty, license - on all physicians (and non-physician prescribers) that appear in the Open Payments data. 
 
+**Building the payment record dataset**
 
+Because the unique identifier in Open Payments is not the NPI (but the "Profile ID") we'll first use the CRSF to identify the corresponding Profile ID for each NPI we have. Then, we'll use the Profile ID to access the payment records across all the Program Year files and their sub-files (general, research, ownership). 
+
+To start, we need the following raw data files: 
+
+  - the CRSF
+  - the list of verified npis
+  - the program year payment record files
+
+Next, we'll use the below suite of functions (written for this purpose) in sequential order. The sequential order bit is important, as often one function will take as input the preceding function's output. For starters, we'll just work with one Program Year at a time - 2021. 
+
+1. **clean_verified_npis()**
+   - Remove duplicate and missing NPIs from our verified list for ease of use later
+2. **clean_physician_supplement()**
+   - Remove anyone with a missing NPI in the CRSF and convert the NPI column to a character in the CRSF 
+3. **get_profile_ids()**
+    - Identify and create the subset of the CRSF for our authors (using profile IDs) which are in the CRSF (and thus in Open Payments)
+4. **get_payment_records()** *x3 - run once for each subfile - general, research, owenership*
+    - Create a subset of all the payment records affiliated with each profile ID we have in our dataset returned by **get_profile_ids()**
+
+At this stage, we should have all payment records available for each author with an verified NPI on our list - for the year 2021. Becuase we've had to run **get_payment_records()** three times (once for each payment subfile), it means that our authors' payment records are stored in three separate subset files. We want to bind these together to create a single file for 2021, but we need to add 2 columns to each of them first:
+
+- a column for Year
+- a column for payment type (general, research, ownership)
+
+We do this using **mutate()** and then we bind the three datasets together, and repeat **get_payment_records()** for all the remaining program years. Once complete, we bind them all together to complete our mega dataset build - and that's that! 
+
+In our next protocol -- XYZMH -- we'll walk through the process for developing an API to query our megaset and enable analysis exploring relationships between industry and US clinical practice guideline author committees. 
