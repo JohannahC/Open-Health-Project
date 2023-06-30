@@ -117,21 +117,21 @@ write.csv(authors_clean, "authors_clean.csv")
 
 ### Step 3: match names to National Provider Identifier (NPI) and verify accuracy
 
-Before going further, a few definitions:
+The objective of Step 3 is to match each author with the correct unique National Provier Identifier, where an NPI is available. An NPI should be available in all cases where an author has prescribing rights in the US (ie. a doctor, nurse practitioner, pharmacist).
 
-A **National Provider Identifier** is a unique 10-digit number used as the standard that identifies an individual or organization as a healthcare provider in electronic health transactions covered under HIPAA. Technically speaking, an NPI is not a license ID or a healthcaer provider registration number. But anyone who delivers healthcare and then transacts electronically in a way that is covered by HIPAA (ie. payment, insurance billing, sharing of medical records, etc), must have an NPI. Therefore, virtually all **prescribers** will have had one by 2013 and it is the prescriber identifier used by the Open Payments system, **so our goal is to obtain this number for each author who has one**. 
+To accurately match, we need to address the challenge of name variability between the name an author publishes under and the name the author registered their NPI with. Consider the fictitious author who publishes under the name "J. Michael Roberts", but who's NPI is registered as "John M. Roberts" or the author who's changed their last name after marriage, but continues to publish under their last name at birth. A simple name search in the NPI registry may mismatch or miss entirely these authors. 
 
-Because payment records in the Open Payments database are only available for those US-based healthcare providers who have prescribing rights, in this project we are only interested in **US-based prescribers** - which we define here as anyone with a credential that confers the ability to obtain prescribing rights (if licensure is obtained) and who works or has worked in this capacity in the US. We acknowledge the credential is just a proxy of prescribing rights, as one may hold an MD without being a licensed MD, but in this project, unless something suggests otherwise for a given author, we assume they are the same.
+To address this, this phase of the protocol necessitates both manual and programmatic work. 
 
 ***
 
-**Overview:** this phase of the protocol is a little hairy. So in brief it consists of 3 main phases:
+**Overview:** this phase of the protocol consists of 3 steps:
 
 >1. **OP eligibility assessment**: 
-There are certain scenarios in which a guideline author may not be eligible to even be in the Open Payments database, in which case, it's best for us not to include them in the query, and risk accidentally matching someone else with the same name, who is in the NPI registry. Authors may be ineligible to be in the OP data if they: do not have prescribing rights (ie. a registered nurse or respiratory therapist (RN, RRT, etc)), are non-US based (ie. an MD from Spain), are not healthcare providers (ie. other researchers, patient representatives, legal experts, etc).
+Because there are cases in which a guideline author may not even be eligible to be in the Open Payments database, it's important that we identify and exclude these authors from our name matching step (lest we accidentally match them to someone else's NPI in the registry because they share a name, and unkowingly search the payments data for the wrong person). Authors will not be in the OP data if they: do not have prescribing rights or have never worked as a healthcare provider in the US.
 
 >2. **Fetch potential matches using NPPES API**:
-The names of eligible authors are queried in the NPPES API that enables access to the up-to-date list of everyone with an NPI number, and relevant identifying information (practice location, licensure, medical specialty, other names, and more)
+The names of eligible authors are queried in the NPPES API, which enables access to the up-to-date list of everyone with an NPI number and relevant identifying information about them (practice location, licensure, medical specialty, other names, and more).
 
 >3. **The NPI verification**: 
 select name matches are combed manually once again against specified criteria, to ensure the author is paired with the correct NPI 

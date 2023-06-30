@@ -17,3 +17,4 @@ src/*.rds
 *.RData
 *.Rdata
 *.csv
+*.txt
