@@ -7,15 +7,15 @@
 
 # Phase 1 - prepare base data (npis and profile ids)
 
-# 1. run clean_verified_npis()
-# 2. run clean_physician_supplement()
-# 3. run get_profile_ids()
+# 1. use clean_verified_npis()
+# 2. use clean_physician_supplement()
+# 3. use get_profile_ids()
 
 # Phase 2 - use profile IDs to gather all payment records (general, research, ownership) for each year
 
-# 4. run get_payment_records()
-# 5. run add_payment_type_column() to add the type of payment for each sub-file
-# 6. run bind_subfiles() to bind the 3 subfiles together for a given year
+# 4. use get_payment_records()
+# 5. use add_payment_type_column() to add the type of payment for each sub-file
+# 6. use bind_rows() to bind the 3 subfiles together for a given year
 # **repeat steps 4-6 for each remaining year
 
 # Phase 3 - combine all data from all years into 1 df
@@ -32,8 +32,8 @@ devtools::load_all()
 # Phase 1
 
 # Load necessary base data (only once)
-verified <- read_rds("/Users/johannahcramer/Documents/GitHub/coi/src/verified_sample.rds")
-supplement <- read.csv("/Users/johannahcramer/Documents/GitHub/coi/data-raw/OP_CVRD_RCPNT_PRFL_SPLMTL_P01202023.csv")
+verified <- read_rds("src/verified_sample.rds")
+supplement <- read.csv("data-raw/OP_CVRD_RCPNT_PRFL_SPLMTL_P01202023.csv")
 
 # Prep base data
 

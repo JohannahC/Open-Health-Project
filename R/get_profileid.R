@@ -70,7 +70,6 @@ get_payment_records <- function(dataset1, dataset2) {
 #' add column for payment type
 #'
 #' @param dataset (Ex. general_payments_2021)
-#' @param year (ex. "2021")
 #' @param payment type (ex. "general")
 #' @return an updated version of the dataset, with 2 new columns (year and payment_type) filled in with the relevant values
 #' @export
