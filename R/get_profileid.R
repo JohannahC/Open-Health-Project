@@ -67,5 +67,22 @@ get_payment_records <- function(dataset1, dataset2) {
   return(payments) # includes all payment records associated with each profile ID in dataset2
 }
 
+#' add column for payment type
+#'
+#' @param dataset (Ex. general_payments_2021)
+#' @param year (ex. "2021")
+#' @param payment type (ex. "general")
+#' @return an updated version of the dataset, with 2 new columns (year and payment_type) filled in with the relevant values
+#' @export
+#' @examples
+add_payment_type_column <- function(dataset, payment_type) {
+  dataset <- dataset |>
+    mutate(payment_type = payment_type)
+
+  return(dataset)
+}
+
+devtools::document()
+
 
 
