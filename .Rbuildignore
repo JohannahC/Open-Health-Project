@@ -3,5 +3,6 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-
+^coi\\data-raw
+^coi\\src
 
