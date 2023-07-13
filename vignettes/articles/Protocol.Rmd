@@ -50,71 +50,44 @@ For now, let's proceed to step 2 with the DOI from our example guideline:
 
 The goal of Step 2 is to use our DOI to programmatically extract and organize the guideline's metadata, such that we end up with a dataset consisting of the unique authors of our document.
 
-To do so, we run our DOI through the API developed and maintained by Crossref, one of the world's largest DOI registration agencies. Crossref's API allows anyone to access metadata associated with any of their own DOIs. Luckily, there's an R package (**rcrossref**) developed for accessing it.
+To do so, we run our DOI through the API developed and maintained by Crossref, one of the world's largest DOI registration agencies. Crossref's API allows anyone to access metadata associated with any of **their own DOIs** (important to remember this fact). Luckily, there's an R package (**rcrossref**) developed for accessing it.
 
-These **rcrossref** guides were helpful for this step:
+These additional **rcrossref** guides are helpful for understanding this step:
 
-- Package/ Github repository <https://ciakovx.github.io/rcrossref.html#Searching_by_DOI>
-- Corresponding Youtube Tutorial <https://www.youtube.com/watch?v=dy-raTcj0no>
+- [rcrossref package/Github repository](https://ciakovx.github.io/rcrossref.html#Searching_by_DOI)
+- [It's corresponding YouTube tutorial](https://www.youtube.com/watch?v=dy-raTcj0no)
 
-Here's the step-by-step for our DOI
+To begin, we load the following packages: 
 
-First, load packages:
+rcrossref
+usethis
+listviewer
+tidyverse
+dplyr
+purrr
 
-```{r load-packages, eval=FALSE, echo=TRUE, cache=TRUE}
-library(rcrossref)
-library(usethis)
-library(listviewer)
-library(tidyverse)
-library(dplyr)
-library(purrr)
-```
-
-To adhere to Crossrefs polite-user policy, I provide them my email address when making the API call (stored in the ~/.Renviron)
+To adhere to Crossrefs polite-user policy, we need to provide them with an email address when making the API call (you can store it in the ~/.Renviron as follows)
 
 ```{r api-setup, eval=FALSE, echo=TRUE, cache=TRUE}
 file.edit("~/.Renviron")
 usethis::edit_r_environ()
 ```
 
-Next, we store the DOI in a variable and then make the API call by passing it through cr_works() which is a **rcrossref** fucntion (in crossref, "works" refers to an individual article) in order to retrieve all the data associated with the DOI. The results are stored in my_dois_works.
+Next, we use the function **get_guideline_metadata()** which we wrote for this purpose. As an argument, it takes any dataset that has a column named "doi" in which dois are listed in string form. For us, we'll use our complete guidelines dataset that also contains a doi column, but in theory, you could give it anything that meets the doi column criteria.
 
-```{r api-call , eval=FALSE, echo=TRUE, cache=TRUE}
+**get_guideline_metadata()** does the following:
 
-doi <- "10.1161/STR.0000000000000436"
-my_dois_works <- rcrossref::cr_works(dois = doi) %>%
-  pluck("data")
-``` 
+- takes the 'doi' column in your dataset and turns it into a vector list of dois
+- passes this doi list through the Crossref API using rcrossref's function cr_works() 
+- stores this in a df and then plucks the data we want (in our case this is called "data")
+- unnests the data we want (author names) into their own rows
+- cleans the resulting dataframe so that we keep only the columns we want and that all our final columns are also unnested. 
 
-Now, the author data needs to be unnested from the call dump, so that each author gets their own row in the new dataframe
+The columns we're interested in keeping are: the DOI, the guideline title, the journal, the date published, given (first) and family (last) names, along with suffix, affiliations, ORCID IDs and urls. 
 
-```{r api-author-unnest , eval=FALSE, echo=TRUE, cache=TRUE}
-# Unnest the author column into separate rows
-my_dois_works <- my_dois_works %>%
-  mutate(author = map(author, ~ as.data.frame(.))) %>%
-  unnest(author)
-``` 
+Afterwards, we have a dataframe which contains all the author data for our guideline (first name, last name, suffix, affiliations, ORCID) along with the above information on the guideline (doi, title, journal, publication date, url). 
 
-After,  we clean it up so that we only keep the columns we're interested in for each author. In this case, the DOI, the guideline title, the journal, the date published, given and family names, along with suffix, affiliations, ORCID Id and urls. 
-
-```{r api-cleanup , eval=FALSE, echo=TRUE, cache=TRUE}
-
-authors_clean <- my_dois_works %>%
-  select(doi, title, container.title, issued, given, family, suffix, affiliation.name,
-         affiliation1.name,affiliation2.name, affiliation3.name,ORCID, link, url)
-
-#forgot: unnest the link variable and extract the URL as link_url
-authors_clean <- authors_clean %>%
-  mutate(link_url = map_chr(link, ~pluck(., "URL")[1])) %>%
-  select(-link)
-``` 
-
-Now we have a dataframe called **authors_clean** which contains all the author data for our guideline (first name, last name, suffix, affiliations, ORCID) along with the above information on the guideline (doi, title, journal, publication date, url). Lastly, we write the df to a csv so we can use it in Step 3. 
-
-``` {r write-csv, eval=FALSE, echo=TRUE, cache=TRUE}
-
-write.csv(authors_clean, "authors_clean.csv")
-```
+Lastly, we write the df to a csv so we can use it in Step 3. 
 
 ### Step 3: match names to National Provider Identifier (NPI) and verify accuracy
 

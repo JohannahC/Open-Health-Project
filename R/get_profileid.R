@@ -81,7 +81,7 @@ add_payment_type_column <- function(dataset, payment_type) {
   return(dataset)
 }
 
-devtools::document()
+
 
 
 
