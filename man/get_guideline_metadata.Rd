@@ -8,7 +8,7 @@ prereq: check crossref API user guide first & follow polite use rules}
 get_guideline_metadata(dataset)
 }
 \arguments{
-\item{dataset}{guidelines dataframe that includes doi column named "doi"}
+\item{dataset}{dataset of guideines that includes a column for doi named "doi"}
 }
 \value{
 dataset of author names for each guideline doi in the argument dataset

@@ -1,6 +1,7 @@
 library(tidyverse)
 library(rvest)
 library(dplyr)
+library(janitor)
 
 scrape_standard_of_care <- function(url_number, year) {
   data <- read_html(paste0("https://diabetesjournals.org/care/issue/", url_number, "/Supplement_1")) |>
@@ -24,4 +25,10 @@ standardsofcare <- standardsofcare |>
 
 View(standardsofcare)
 
-write_csv(standardsofcare, "/coi/data/ada_dois.csv")
+#clean columns
+standardsofcare <- clean_names(standardsofcare)
+
+# Remove the "https://doi.org/" part from the doi column
+standardsofcare$doi <- str_remove(standardsofcare$doi, "https://doi.org/")
+
+write_csv(standardsofcare, "data-raw/ada_dois.csv")
