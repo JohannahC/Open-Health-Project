@@ -23,3 +23,5 @@ standardsofcare <- standardsofcare |>
   rbind(scrape_standard_of_care("41", "2018"))
 
 View(standardsofcare)
+
+write_csv(standardsofcare, "/coi/data/ada_dois.csv")
