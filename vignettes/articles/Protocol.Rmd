@@ -1,5 +1,5 @@
 ---
-title: "Protocol: industry relationships in guidelines (i-rig)"
+title: "Open Health Project Protocol: dataset build"
 date: "`r Sys.Date()`"
 ---
 
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-This document outlines the protocol for building the Industry Relationships in Guidelines (I-RIG) dataset - which offers a way to explore corporate influence on the development of US clinical practice guidelines. For each guideline, I-RIG contains a history of the payments and gifts received (since 2013) by any author of an included guideline, provided they have US-prescribing rights. 
+This document outlines the protocol for building OHP's dataset - which offers a way to explore a decade's worth of industry influence on the development of US clinical practice guidelines. The dataset contains all available records of any payments or gifts received by any author of an included guideline, provided they have US-prescribing rights. 
 
 ## The protocol
 
@@ -20,8 +20,8 @@ For each guideline, there are 4 broad steps:
 
 >1. Find the guideline  
 >2. Extract the author names & relevant metadata 
->3. Match names to [National Provider Identifier](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIde>ntStand#:~:text=The%20NPI%20is%20a%20unique,financial%20transactions%20adopted%20under%20HIPAA.) (NPI) **and verify accuracy**
->4. For each author, link NPI to [US Open Payments Data](https://openpaymentsdata.cms.gov/)
+>3. Use names to identify correct [National Provider Identifier](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIde>ntStand#:~:text=The%20NPI%20is%20a%20unique,financial%20transactions%20adopted%20under%20HIPAA.) (NPI)
+>4. Link each author's NPI to [US Open Payments Data](https://openpaymentsdata.cms.gov/)
 
 To illustrate these steps, this document will walk through the data construction for the [2023 Guideline for the Management of Patients with Aneurysmal Subarachnoid Hemorrhage: A Guideline from the American Heart Association/American Stroke Association](https://www.ahajournals.org/doi/epdf/10.1161/STR.0000000000000436). However, keep in mind that the steps outlined here are designed to be completed programmatically at scale. 
 
@@ -31,7 +31,7 @@ The guideline is the starting point of all further data construction. We need it
 
 **Guidelines can be found in many places including:**
 
-- Directly on the webpage of the professional medical association (ex. [American Diabetes Association](https://diabetesjournals.org/care/issue/46/Supplement_1), [National Comprehensive Cancer Network](https://www.nccn.org/guidelines/nccn-guidelines), [American Heart Association/American College of Cardiology](https://professional.heart.org/en/guidelines-and-statements))
+- Directly on the webpage of the professional medical association (ex. [American Diabetes Association](https://diabetesjournals.org/care/issue/46/Supplement_1), [National Comprehensive Cancer Network (NCCN)](https://www.nccn.org/guidelines/nccn-guidelines), [American Heart Association/American College of Cardiology](https://professional.heart.org/en/guidelines-and-statements))
 - Guideline databases ([ECRI Guidelines Trust](https://www.ecri.org/solutions/ecri-guidelines-trust), [Guideline Central](https://www.guidelinecentral.com/), [Guidelines International Network](https://g-i-n.net/)) that maintain curated, (though non-comprehensive lists) of guidelines
 - Search engines for biomedical literature ([PubMed](https://pubmed.ncbi.nlm.nih.gov/)). Note: these are messy
 
@@ -89,7 +89,7 @@ Afterwards, we have a dataframe which contains all the author data for our guide
 
 Lastly, we write the df to a csv so we can use it in Step 3. 
 
-### Step 3: match names to National Provider Identifier (NPI) and verify accuracy
+### Step 3: Use names to identify correct [National Provider Identifier](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIde>ntStand#:~:text=The%20NPI%20is%20a%20unique,financial%20transactions%20adopted%20under%20HIPAA.) (NPI)
 
 The objective of Step 3 is to match each author with the correct unique National Provier Identifier, where an NPI is available. An NPI should be available in all cases where an author has prescribing rights in the US (ie. a doctor, nurse practitioner, pharmacist).
 
@@ -178,7 +178,7 @@ If we cannot confidently identify the NPI match, make an attempt to email the pe
 
 *list unverified matches as NA*
 
-### Step 4: for each author, link NPI to [US Open Payments Data](https://openpaymentsdata.cms.gov/)
+### Step 4: Link each author's NPI to [US Open Payments Data](https://openpaymentsdata.cms.gov/)
 
 The goal of Step 4 is to identify (and create a subset of) all the payment records in the Open Payment's database associated with each NPI on our verified list (finalized in Step 3). The Open Payments data is available for download at:  https://www.cms.gov/OpenPayments/Data/Dataset-Downloads.  
 
@@ -212,4 +212,7 @@ At this stage, we should have all payment records available for each author with
 
 We do this using **mutate()** and then we bind the three datasets together, and repeat **get_payment_records()** for all the remaining program years. Once complete, we bind them all together to complete our mega dataset build - and that's that! 
 
-In our next protocol -- XYZMH -- we'll walk through the process for developing an API to query our megaset and enable analysis exploring relationships between industry and US clinical practice guideline author committees. 
+The process is repeated for all guidelines of interest (~1500)
+
+
+Coming soon: protocols for API & visual dashboard development 
